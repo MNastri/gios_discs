@@ -29,26 +29,22 @@ def setup_known_solutions():
             known_solutions += (DISCS[disc],)
     return known_solutions
 
+
 if __name__ == "__main__":
-    known_solutions = [
-        Move(
-            center=DISC_4,
-            perimeter=[
-                DISC_2,
-                DISC_0.rotate_clockwise(2),
-                DISC_3.rotate_clockwise(4),
-                DISC_1.rotate_clockwise(3),
-                DISC_6.rotate_clockwise(1),
-                DISC_5.rotate_clockwise(5),
-            ],
-            remaining_discs=[],
-        )
-    ]
+    known_solutions = setup_known_solutions()
     empty_table = Table()
-    solver = Solver(table=empty_table, discs=ALL_DISCS)
+    solver = Solver(table=empty_table, discs=ALL_DISCS, known_solutions=known_solutions)
     solution = solver.solve()
+
+    if known_solutions:
+        for known_solution in known_solutions:
+            print(known_solution.center)
+            for disc in known_solution.perimeter:
+                print(disc)
+            print(known_solution.remaining_discs)
+
     if solution:
-        print("\n" * 3)
+        print("\n" * 2)
         print(solution.center)
         for disc in solution.perimeter:
             print(disc)
