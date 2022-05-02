@@ -18,7 +18,16 @@ DISCS = {
 ALL_DISCS = [DISCS[0], DISCS[1], DISCS[2], DISCS[3], DISCS[4], DISCS[5], DISCS[6]]
 
 
-ALL_DISCS = [DISC_0, DISC_1, DISC_2, DISC_3, DISC_4, DISC_5, DISC_6]
+def setup_known_solutions():
+    discs = [4, 2, 0, 3, 1, 6, 5]
+    rotations = [0, 0, 2, 4, 3, 1, 5]
+    known_solutions = []
+    for disc, rotation in zip(discs, rotations):
+        if rotation > 0:
+            known_solutions += (DISCS[disc].rotate_clockwise(rotation),)
+        else:
+            known_solutions += (DISCS[disc],)
+    return known_solutions
 
 if __name__ == "__main__":
     known_solutions = [
