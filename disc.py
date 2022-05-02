@@ -46,3 +46,12 @@ class Disc:
                 self.slots[idx] = self.slots[idx + 1]
             self.slots[5] = saved_slot
         self.rotation = 0
+
+    def __eq__(self, other):
+        if other is None:
+            return False
+        if self.slots == other.slots and self.rotation == other.rotation:
+            return True
+        return False
+
+   
