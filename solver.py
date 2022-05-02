@@ -81,14 +81,19 @@ class Solver:
 
     def solve(self) -> Move:
         if self.table.is_solved:
+            center = deepcopy(self.table.center)
+            perimeter = deepcopy(self.table.perimeter)
+            remaining_discs = deepcopy(self.discs)
             solution = Move(
-                center=self.table.center,
-                perimeter=self.table.perimeter,
-                remaining_discs=self.discs,
+                center=center,
+                perimeter=perimeter,
+                remaining_discs=remaining_discs,
             )
             if solution in self.known_solutions:
+                print("=" * 20 + "\nSOLUTION FOUND, BUT ALREADY KNOWN\n" + "=" * 20)
                 return False
             return solution
+        # TODO code maybe unecessary,check if this is even possible
         if len(self.discs) < self.table.number_of_empty_places:
             return False
         while self.posssible_moves:
