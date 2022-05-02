@@ -32,6 +32,7 @@ class Disc:
                 self.slots[idx] = self.slots[idx + 1]
             self.slots[5] = saved_slot
             self.rotation += 1
+        return self
 
     def __repr__(self):
         return f"{self.__class__.__name__}{self.slots},rotation:{self.rotation}"
