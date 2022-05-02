@@ -1,5 +1,6 @@
 from atexit import register
 from datetime import datetime
+from sys import modules
 from time import (
     perf_counter_ns,
     time,
@@ -40,7 +41,7 @@ class Timing:
         print(self.time_to_str() + ":", message)
         if elapsed_time is None:
             elapsed_time = self.time_elapsed
-        print("Elapsed time:", elapsed_time,"ns")
+        print("Elapsed time:", elapsed_time, "ns")
         print(Timing.lines)
 
     def time_to_str(self):
@@ -84,9 +85,10 @@ if __name__ == "__main__":
 
 
 def end_log():
-    timer.log(message="Program ended")
+    timer.log(message=f"Program {calling_module} ended")
 
 
+calling_module = modules["__main__"].__file__
 timer = Timing()
-timer.log(message="Program started")
+timer.log(message=f"Program {calling_module} started")
 register(end_log)
