@@ -26,8 +26,8 @@ class Color:
         self.color = color
 
     @classmethod
-    def from_int(cls, s):
-        color_kind = COLOR_MAP[s]
+    def from_int(cls, i):
+        color_kind = COLOR_MAP[i]
         return cls(color_kind)
 
     def __repr__(self):
