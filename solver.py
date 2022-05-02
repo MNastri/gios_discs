@@ -57,6 +57,9 @@ class Solver:
     def _test_disc_at_perimeter_index(self, disc, idx):
         new_disc = deepcopy(disc)
         remaining_discs = [deepcopy(dd) for dd in self.discs if dd != disc]
+        # TODO instead of checking one by one, find the distance between the desired
+        #  color (the color in slots[0] for example) and the present color,
+        #  then rotate that many times to pair the wanted color with the desired slot.
         for _ in range(6):
             self.table.place_at_perimeter(idx, new_disc)
             if self.table.is_valid:
