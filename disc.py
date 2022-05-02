@@ -54,4 +54,8 @@ class Disc:
             return True
         return False
 
-   
+    @classmethod
+    def from_str(cls, s):
+        ints = list(map(int, s))
+        slots = list(map(Color.from_int, ints))
+        return cls(slots)

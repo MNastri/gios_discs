@@ -6,76 +6,17 @@ from move import Move
 from solver import Solver
 from table import Table
 
-DISC_0 = Disc(
-    slots=[
-        Color.from_int(0),
-        Color.from_int(1),
-        Color.from_int(4),
-        Color.from_int(5),
-        Color.from_int(2),
-        Color.from_int(3),
-    ]
-)
-DISC_1 = Disc(
-    slots=[
-        Color.from_int(0),
-        Color.from_int(2),
-        Color.from_int(1),
-        Color.from_int(3),
-        Color.from_int(4),
-        Color.from_int(5),
-    ]
-)
-DISC_2 = Disc(
-    slots=[
-        Color.from_int(0),
-        Color.from_int(3),
-        Color.from_int(4),
-        Color.from_int(2),
-        Color.from_int(1),
-        Color.from_int(5),
-    ]
-)
-DISC_3 = Disc(
-    slots=[
-        Color.from_int(0),
-        Color.from_int(3),
-        Color.from_int(5),
-        Color.from_int(4),
-        Color.from_int(2),
-        Color.from_int(1),
-    ]
-)
-DISC_4 = Disc(
-    slots=[
-        Color.from_int(0),
-        Color.from_int(4),
-        Color.from_int(2),
-        Color.from_int(3),
-        Color.from_int(5),
-        Color.from_int(1),
-    ]
-)
-DISC_5 = Disc(
-    slots=[
-        Color.from_int(0),
-        Color.from_int(4),
-        Color.from_int(2),
-        Color.from_int(5),
-        Color.from_int(3),
-        Color.from_int(1),
-    ]
-)
-DISC_6 = Disc(
-    slots=[
-        Color.from_int(0),
-        Color.from_int(5),
-        Color.from_int(1),
-        Color.from_int(2),
-        Color.from_int(4),
-        Color.from_int(3),
-    ]
-)
+DISCS = {
+    0: Disc.from_str("014523"),
+    1: Disc.from_str("021345"),
+    2: Disc.from_str("034215"),
+    3: Disc.from_str("035421"),
+    4: Disc.from_str("042351"),
+    5: Disc.from_str("042531"),
+    6: Disc.from_str("051243"),
+}
+ALL_DISCS = [DISCS[0], DISCS[1], DISCS[2], DISCS[3], DISCS[4], DISCS[5], DISCS[6]]
+
 
 ALL_DISCS = [DISC_0, DISC_1, DISC_2, DISC_3, DISC_4, DISC_5, DISC_6]
 
