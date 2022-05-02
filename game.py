@@ -82,5 +82,6 @@ if __name__ == "__main__":
     if solution:
         print("\n" * 3)
         print(solution.center)
-        print(solution.perimeter)
+        for disc in solution.perimeter:
+            print(disc)
         print(solution.remaining_discs)
