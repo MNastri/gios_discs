@@ -32,3 +32,8 @@ class Color:
 
     def __repr__(self):
         return f"{self.color.name}"
+
+    def __eq__(self, other):
+        if self.color.value == other.color.value:
+            return True
+        return False
