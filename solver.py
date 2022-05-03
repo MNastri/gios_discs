@@ -121,17 +121,13 @@ class Solver:
     def solve_disc_at_perimeter_index(self, disc, idx):
         new_disc = deepcopy(disc)
         discs = [deepcopy(dd) for dd in self.discs if dd != disc]
-        # TODO instead of checking one by one, find the distance between the
-        #  desired color (the color in slots[0] for example) and the present
-        #  color in the slot, then rotate that many times to pair the wanted
-        #  color with the desired slot.
-        for _ in range(6):
-            with self.table.temporary_placement_at_perimeter(idx, new_disc):
-                if not self.table.is_valid:
-                    if new_disc.rotation == 5:
-                        break
-                    new_disc.rotate_clockwise(1)
-                    continue
+        center_slot_color = self.table.center.slots[idx]
+        perimeter_slot_position = new_disc.slots.index(center_slot_color)
+        if perimeter_slot_position > 0:
+            rotations = perimeter_slot_position
+            new_disc.rotate_clockwise(rotations)
+        with self.table.temporary_placement_at_perimeter(idx, new_disc):
+            if self.table.is_valid:
                 new_move = self.create_move_from_copies(
                     self.table.center, self.table.perimeter, discs
                 )
