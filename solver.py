@@ -40,7 +40,8 @@ class Solver:
         self._possible_moves = []
         self._counter = 0
 
-    def _check_not_enough_discs(self):
+    @property
+    def _not_enough_discs(self):
         # TODO MAKE INTO PROPERTY
         return len(self.discs) < self.table.number_of_empty_places
 
@@ -98,8 +99,8 @@ class Solver:
         solution = self._check_solved()
         if solution:
             return solution
-        # TODO code maybe unecessary,check if this is even possible
-        if self._check_not_enough_discs():
+        # TODO code maybe unecessary,check if this is even possible to happen
+        if self._not_enough_discs:
             return False
         if self.table.center is None:
             for disc in self.discs:
@@ -204,8 +205,8 @@ class Solver:
         solution = self._check_solved()
         if solution:
             return solution
-        # TODO code maybe unecessary,check if this is even possible
-        if self._check_not_enough_discs():
+        # TODO code maybe unecessary,check if this is even possible to happen
+        if self._not_enough_discs:
             return False
         while self.possible_moves:
             next_move = self.pop_move()
