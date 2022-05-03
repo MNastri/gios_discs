@@ -41,7 +41,7 @@ def setup_known_solutions():
     return solutions
 
 
-if __name__ == "__main__":
+def find_solution():
     known_solutions = setup_known_solutions()
     empty_table = Table()
     solver = Solver(table=empty_table, discs=ALL_DISCS, known_solutions=known_solutions)
@@ -60,3 +60,6 @@ if __name__ == "__main__":
         for disc in solution.perimeter:
             print(disc)
         print(solution.remaining_discs)
+
+
+find_solution()
