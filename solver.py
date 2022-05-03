@@ -106,24 +106,39 @@ class Solver:
                 return solution
         return False
 
-    @property
-    def solution(self):
-        solution = self.create_move_from_copies(
-            self.table.center, self.table.perimeter, self.discs
+    def run_next_solver(self, next_move):
+        next_table = Table(next_move.center, next_move.perimeter)
+        move_tracker = deepcopy(self.move_tracker)
+        next_solver = Solver(
+            next_table,
+            next_move.remaining_discs,
+            self.known_solutions,
+            self._depth_first,
+            move_tracker,
         )
-        return solution  # TODO DEAL WITH DEBUG AND KNOWN SOLUTION
+        solution = next_solver.solve()
+        return solution
 
-    @property
-    def possible_moves(self):
-        return self._possible_moves
-
-    @property
-    def not_enough_discs(self):
-        return len(self.discs) < self.table.number_of_empty_places
-
-    @property
-    def move_tracker(self):
-        return f"{self._move_tracker}{self.counter}"
+    def test_disc_at_perimeter_index(self, disc, idx):  # TODO RENAME
+        new_disc = deepcopy(disc)
+        discs = [deepcopy(dd) for dd in self.discs if dd != disc]
+        # TODO instead of checking one by one, find the distance between the
+        #  desired color (the color in slots[0] for example) and the present
+        #  color in the slot, then rotate that many times to pair the wanted
+        #  color with the desired slot.
+        for _ in range(6):
+            self.table.place_at_perimeter(idx, new_disc)
+            if self.table.is_valid:  # TODO INVERT ORDER OF THIS IF
+                new_move = self.create_move_from_copies(
+                    self.table.center, self.table.perimeter, discs
+                )
+                self.table.remove_at_perimeter(idx)
+                return new_move
+            else:
+                self.table.remove_at_perimeter(idx)
+                if new_disc.rotation == 5:
+                    break
+                new_disc.rotate_clockwise(1)
 
     def create_move_from_copies(self, center, perimeter, discs):
         dc = deepcopy
@@ -162,38 +177,24 @@ class Solver:
                 possible_moves += (new_move,)
         return possible_moves
 
-    def run_next_solver(self, next_move):
-        next_table = Table(next_move.center, next_move.perimeter)
-        move_tracker = deepcopy(self.move_tracker)
-        next_solver = Solver(
-            next_table,
-            next_move.remaining_discs,
-            self.known_solutions,
-            self._depth_first,
-            move_tracker,
+    @property
+    def solution(self):
+        solution = self.create_move_from_copies(
+            self.table.center, self.table.perimeter, self.discs
         )
-        solution = next_solver.solve()
-        return solution
+        return solution  # TODO DEAL WITH DEBUG AND KNOWN SOLUTION
 
-    def test_disc_at_perimeter_index(self, disc, idx):
-        new_disc = deepcopy(disc)
-        discs = [deepcopy(dd) for dd in self.discs if dd != disc]
-        # TODO instead of checking one by one, find the distance between the desired
-        #  color (the color in slots[0] for example) and the present color,
-        #  then rotate that many times to pair the wanted color with the desired slot.
-        for _ in range(6):
-            self.table.place_at_perimeter(idx, new_disc)
-            if self.table.is_valid:  # TODO INVERT ORDER OF THIS IF
-                new_move = self.create_move_from_copies(
-                    self.table.center, self.table.perimeter, discs
-                )
-                self.table.remove_at_perimeter(idx)
-                return new_move
-            else:
-                self.table.remove_at_perimeter(idx)
-                if new_disc.rotation == 5:
-                    break
-                new_disc.rotate_clockwise(1)
+    @property
+    def possible_moves(self):
+        return self._possible_moves
+
+    @property
+    def not_enough_discs(self):
+        return len(self.discs) < self.table.number_of_empty_places
+
+    @property
+    def move_tracker(self):
+        return f"{self._move_tracker}{self.counter}"
 
     def debug_table(self):
         print()
