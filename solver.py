@@ -20,7 +20,7 @@ class Solver:
     The discs attribute contains the remaining unplaced discs.
     """
 
-    def __init__(self, table: Table, discs: List[Disc], known_solutions=[]):
+    def __init__(self, table: Table, discs: List[Disc], known_solutions=None):
         """Constructor for Solver."""
         assert (
             table.number_of_empty_places - len(discs) == 0
@@ -30,7 +30,10 @@ class Solver:
             print(table)
         self.table = table
         self.discs = discs
-        self.known_solutions = known_solutions
+        if known_solutions is None:
+            self.known_solutions = []
+        else:
+            self.known_solutions = known_solutions
         self._possible_moves = []
         self.find_possible_moves()
 
