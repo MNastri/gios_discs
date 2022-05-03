@@ -126,18 +126,16 @@ class Solver:
         #  color in the slot, then rotate that many times to pair the wanted
         #  color with the desired slot.
         for _ in range(6):
-            self.table.place_at_perimeter(idx, new_disc)
-            if self.table.is_valid:  # TODO INVERT ORDER OF THIS IF
-                new_move = self.create_move_from_copies(
-                    self.table.center, self.table.perimeter, discs
-                )
-                self.table.remove_at_perimeter(idx)
-                return new_move
-            else:
-                self.table.remove_at_perimeter(idx)
-                if new_disc.rotation == 5:
-                    break
-                new_disc.rotate_clockwise(1)
+            with self.table.temporary_placement_at_perimeter(idx, new_disc):
+                if self.table.is_valid:  # TODO INVERT ORDER OF THIS IF
+                    new_move = self.create_move_from_copies(
+                        self.table.center, self.table.perimeter, discs
+                    )
+                    return new_move
+                else:
+                    if new_disc.rotation == 5:
+                        break
+                    new_disc.rotate_clockwise(1)
 
     def create_move_from_copies(self, center, perimeter, discs):
         dc = deepcopy

@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from typing import List
 
 from disc import Disc
@@ -87,8 +88,13 @@ class Table:
     def is_solved(self):
         return self.number_of_empty_places == 0 and self.is_valid
 
-    def place_at_perimeter(self, idx, disc):
-        self.perimeter[idx] = disc
+    @contextmanager
+    def temporary_placement_at_perimeter(self, idx, disc):
+        try:
+            self.perimeter[idx] = disc
+            yield lambda x: x  # dummy yield for contextmanager to work
+        finally:
+            self.remove_at_perimeter(idx)
 
     def remove_at_perimeter(self, idx):
         self.perimeter[idx] = None
