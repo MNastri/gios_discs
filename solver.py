@@ -92,13 +92,24 @@ class Solver:
     def possible_moves(self):
         return self._possible_moves
 
+    @property
+    def solution(self):
+        center = deepcopy(self.table.center)
+        perimeter = deepcopy(self.table.perimeter)
+        remaining_discs = deepcopy(self.discs)
+        solution = Move(
+            center=center,
+            perimeter=perimeter,
+            remaining_discs=remaining_discs,
+        )
+        return solution  # TODO DEAL WITH DEBUG AND KNOWN SOLUTION
+
     def pop_move(self) -> Move:
         return self._possible_moves.pop(0)
 
     def _solve_depth_first(self):
-        solution = self._check_solved()
-        if solution:
-            return solution
+        if self.table.is_solved:
+            return self.solution
         # TODO code maybe unecessary,check if this is even possible to happen
         if self._not_enough_discs:
             return False
@@ -202,9 +213,8 @@ class Solver:
 
     def _solve_breadth_first(self):
         self.find_possible_moves()
-        solution = self._check_solved()
-        if solution:
-            return solution
+        if self.table.is_solved:
+            return self.solution
         # TODO code maybe unecessary,check if this is even possible to happen
         if self._not_enough_discs:
             return False
