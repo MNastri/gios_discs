@@ -79,7 +79,7 @@ class Solver:
         else:
             index_first_empty = self.table.index_of_first_empty_place_perimeter
             for disc in self.discs:
-                next_move = self.test_disc_at_perimeter_index(disc, index_first_empty)
+                next_move = self.solve_disc_at_perimeter_index(disc, index_first_empty)
                 if next_move and DEBUG:
                     self.debug_next_move(next_move)
                 if next_move:
@@ -95,7 +95,6 @@ class Solver:
     def solve_breadth_first(self):
         if self.table.is_solved:
             return self.solution
-        # TODO code maybe unecessary,check if this is even possible to happen
         if self.not_enough_discs:
             return False
         self.find_possible_moves()
@@ -119,7 +118,7 @@ class Solver:
         solution = next_solver.solve()
         return solution
 
-    def test_disc_at_perimeter_index(self, disc, idx):  # TODO RENAME
+    def solve_disc_at_perimeter_index(self, disc, idx):  # TODO RENAME
         new_disc = deepcopy(disc)
         discs = [deepcopy(dd) for dd in self.discs if dd != disc]
         # TODO instead of checking one by one, find the distance between the
@@ -173,7 +172,7 @@ class Solver:
         index_first_empty = self.table.index_of_first_empty_place_perimeter
         possible_moves = []
         for disc in self.discs:
-            new_move = self.test_disc_at_perimeter_index(disc, index_first_empty)
+            new_move = self.solve_disc_at_perimeter_index(disc, index_first_empty)
             if new_move:
                 possible_moves += (new_move,)
         return possible_moves
