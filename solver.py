@@ -5,6 +5,8 @@ from disc import Disc
 from move import Move
 from table import Table
 
+DEBUG = True
+
 
 class Solver:
     """Receives a table with discs (center and perimeter) and the leftover
@@ -23,7 +25,9 @@ class Solver:
         assert (
             table.number_of_empty_places - len(discs) == 0
         ), "why are you doing this!?"
-        print(table)
+        if DEBUG:
+            print()
+            print(table)
         self.table = table
         self.discs = discs
         self.known_solutions = known_solutions
@@ -35,6 +39,13 @@ class Solver:
             self._find_possible_center_moves()
         else:
             self._find_possible_perimeter_moves()
+        if DEBUG:
+            for idx, possible_move in enumerate(self.posssible_moves):
+                print(
+                    f"{idx} of {len(self._possible_moves) - 1}", "\n", possible_move.center
+                )
+                print(f"{possible_move.perimeter}")
+                print(f"{possible_move.remaining_discs}")
 
     def _find_possible_center_moves(self):
         assert len(self.discs) == 7
@@ -89,8 +100,11 @@ class Solver:
                 perimeter=perimeter,
                 remaining_discs=remaining_discs,
             )
-            if solution in self.known_solutions:
-                print("=" * 20 + "\nSOLUTION FOUND, BUT ALREADY KNOWN\n" + "=" * 20)
+            if DEBUG and solution in self.known_solutions:
+                print("=" * 20)
+                print("SOLUTION FOUND, BUT ALREADY KNOWN")
+                print(solution)
+                print("=" * 20)
                 return False
             return solution
         # TODO code maybe unecessary,check if this is even possible
