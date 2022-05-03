@@ -37,6 +37,39 @@ class Solver:
         self._possible_moves = []
         self.find_possible_moves()
 
+    def solve(self) -> Move:
+        if self.table.is_solved:
+            center = deepcopy(self.table.center)
+            perimeter = deepcopy(self.table.perimeter)
+            remaining_discs = deepcopy(self.discs)
+            solution = Move(
+                center=center,
+                perimeter=perimeter,
+                remaining_discs=remaining_discs,
+            )
+            if DEBUG and solution in self.known_solutions:
+                print("=" * 20)
+                print("SOLUTION FOUND, BUT ALREADY KNOWN")
+                print(solution)
+                print("=" * 20)
+                return False
+            return solution
+        # TODO code maybe unecessary,check if this is even possible
+        if len(self.discs) < self.table.number_of_empty_places:
+            return False
+        while self.posssible_moves:
+            next_move = self.pop_move()
+            next_table = Table(center=next_move.center, perimeter=next_move.perimeter)
+            next_solver = Solver(
+                table=next_table,
+                discs=next_move.remaining_discs,
+                known_solutions=self.known_solutions,
+            )
+            solution = next_solver.solve()
+            if isinstance(solution, Move):
+                return solution
+        return False
+
     def find_possible_moves(self):
         if self.table.center is None:
             self._find_possible_center_moves()
@@ -45,10 +78,22 @@ class Solver:
         if DEBUG:
             for idx, possible_move in enumerate(self.posssible_moves):
                 print(
-                    f"{idx} of {len(self._possible_moves) - 1}", "\n", possible_move.center
+                    f"{idx} of {len(self._possible_moves) - 1}",
+                    "\n",
+                    possible_move.center,
                 )
                 print(f"{possible_move.perimeter}")
                 print(f"{possible_move.remaining_discs}")
+
+    @property
+    def posssible_moves(self):
+        return self._possible_moves
+
+    def pop_move(self) -> Move:
+        return self._possible_moves.pop(0)
+
+    def append_move(self, move_obj: Move):
+        self._possible_moves.append(move_obj)
 
     def _find_possible_center_moves(self):
         assert len(self.discs) == 7
@@ -92,49 +137,6 @@ class Solver:
                 if new_disc.rotation == 5:
                     break
                 new_disc.rotate_clockwise(1)
-
-    def solve(self) -> Move:
-        if self.table.is_solved:
-            center = deepcopy(self.table.center)
-            perimeter = deepcopy(self.table.perimeter)
-            remaining_discs = deepcopy(self.discs)
-            solution = Move(
-                center=center,
-                perimeter=perimeter,
-                remaining_discs=remaining_discs,
-            )
-            if DEBUG and solution in self.known_solutions:
-                print("=" * 20)
-                print("SOLUTION FOUND, BUT ALREADY KNOWN")
-                print(solution)
-                print("=" * 20)
-                return False
-            return solution
-        # TODO code maybe unecessary,check if this is even possible
-        if len(self.discs) < self.table.number_of_empty_places:
-            return False
-        while self.posssible_moves:
-            next_move = self.pop_move()
-            next_table = Table(center=next_move.center, perimeter=next_move.perimeter)
-            next_solver = Solver(
-                table=next_table,
-                discs=next_move.remaining_discs,
-                known_solutions=self.known_solutions,
-            )
-            solution = next_solver.solve()
-            if isinstance(solution, Move):
-                return solution
-        return False
-
-    @property
-    def posssible_moves(self):
-        return self._possible_moves
-
-    def pop_move(self) -> Move:
-        return self._possible_moves.pop(0)
-
-    def append_move(self, move_obj: Move):
-        self._possible_moves.append(move_obj)
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.table},remaining_discs:{self.discs})"
