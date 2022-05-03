@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import timing
 
 from color import Color
@@ -19,15 +21,24 @@ ALL_DISCS = [DISCS[0], DISCS[1], DISCS[2], DISCS[3], DISCS[4], DISCS[5], DISCS[6
 
 
 def setup_known_solutions():
-    discs = [4, 2, 0, 3, 1, 6, 5]
-    rotations = [0, 0, 2, 4, 3, 1, 5]
-    known_solutions = []
+    discs = [[4, 2, 0, 3, 1, 6, 5]]
+    rotations = [[0, 0, 2, 4, 3, 1, 5]]
+    places = []
     for disc, rotation in zip(discs, rotations):
-        if rotation > 0:
-            known_solutions += (DISCS[disc].rotate_clockwise(rotation),)
-        else:
-            known_solutions += (DISCS[disc],)
-    return known_solutions
+        rotated_discs = []
+        for color_id, rotation_times in zip(disc, rotation):
+            if rotation_times > 0:
+                rotated_discs += (
+                    deepcopy(DISCS[color_id]).rotate_clockwise(rotation_times),
+                )
+            else:
+                rotated_discs += (deepcopy(DISCS[color_id]),)
+        places += (rotated_discs,)
+    solutions = []
+    for place in places:
+        center, *perimeter = place
+        solutions += (Move(center, perimeter),)
+    return solutions
 
 
 if __name__ == "__main__":
