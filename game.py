@@ -2,7 +2,6 @@ from copy import deepcopy
 
 import timing
 
-from color import Color
 from disc import Disc
 from move import Move
 from solver import Solver
