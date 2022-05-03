@@ -25,11 +25,6 @@ class Color:
         """Constructor for Color"""
         self.color = color
 
-    @classmethod
-    def from_int(cls, i):
-        color_kind = COLOR_MAP[i]
-        return cls(color_kind)
-
     def __repr__(self):
         return f"{self.color.name}"
 
@@ -37,3 +32,8 @@ class Color:
         if self.color.value == other.color.value:
             return True
         return False
+
+    @classmethod
+    def from_int(cls, i):
+        color_kind = COLOR_MAP[i]
+        return cls(color_kind)
