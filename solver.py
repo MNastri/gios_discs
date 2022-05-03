@@ -172,11 +172,11 @@ class Solver:
         return possible_moves
 
     @property
-    def solution(self):
+    def solution(self):  # todo debug_output?
         solution = self.create_move_from_copies(
             self.table.center, self.table.perimeter, self.discs
         )
-        return solution  # TODO DEAL WITH DEBUG AND KNOWN SOLUTION
+        return solution
 
     @property
     def possible_moves(self):
