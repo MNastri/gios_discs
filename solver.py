@@ -39,23 +39,14 @@ class Solver:
         self._possible_moves = []
         self._counter = 0
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.table},remaining_discs:{self.discs})"
+
     def solve(self) -> Move:
         if self._depth_first:
             return self._solve_depth_first()
         else:
             return self._solve_breadth_first()
-
-    @property
-    def solution(self):
-        center = deepcopy(self.table.center)
-        perimeter = deepcopy(self.table.perimeter)
-        remaining_discs = deepcopy(self.discs)
-        solution = Move(
-            center=center,
-            perimeter=perimeter,
-            remaining_discs=remaining_discs,
-        )
-        return solution  # TODO DEAL WITH DEBUG AND KNOWN SOLUTION
 
     # def _check_solved(self):  # TODO RENAME
     #     if self.table.is_solved:
@@ -68,14 +59,23 @@ class Solver:
     #             remaining_discs=remaining_discs,
     #         )
     #         if DEBUG and solution in self._known_solutions:
-    #             print("=" * 20)
-    #             print("SOLUTION FOUND, BUT ALREADY KNOWN")
-    #             print(solution)
-    #             print("=" * 20)
+    #             self._debug_known_solution_found(solution)
     #             return False
     #         elif solution in self._known_solutions:
     #             return False
     #         return solution
+
+    @property
+    def solution(self):
+        center = deepcopy(self.table.center)
+        perimeter = deepcopy(self.table.perimeter)
+        remaining_discs = deepcopy(self.discs)
+        solution = Move(
+            center=center,
+            perimeter=perimeter,
+            remaining_discs=remaining_discs,
+        )
+        return solution  # TODO DEAL WITH DEBUG AND KNOWN SOLUTION
 
     def find_possible_moves(self):
         if self.table.center is None:
@@ -204,6 +204,28 @@ class Solver:
                     break
                 new_disc.rotate_clockwise(1)
 
+    def _find_possible_perimeter_moves(self):
+        index_first_empty = self.table.index_of_first_empty_place_perimeter
+        possible_moves = []
+        for disc in self.discs:
+            new_move = self._test_disc_at_perimeter_index(disc, index_first_empty)
+            if new_move:
+                possible_moves += (new_move,)
+        return possible_moves
+
+    def _find_possible_center_moves(self):
+        assert len(self.discs) == 7
+        for disc in self.discs:
+            new_disc = deepcopy(disc)
+            new_perimeter = deepcopy(self.table.perimeter)
+            remaining_discs = [deepcopy(dd) for dd in self.discs if dd != disc]
+            new_move = Move(
+                center=new_disc,
+                perimeter=new_perimeter,
+                remaining_discs=remaining_discs,
+            )
+            self.append_move(new_move)
+
     def _debug_table(self):
         print()
         print(self.table)
@@ -227,28 +249,3 @@ class Solver:
             )
             print(f"{possible_move.perimeter}")
             print(f"{possible_move.remaining_discs}")
-
-    def _find_possible_perimeter_moves(self):
-        index_first_empty = self.table.index_of_first_empty_place_perimeter
-        possible_moves = []
-        for disc in self.discs:
-            new_move = self._test_disc_at_perimeter_index(disc, index_first_empty)
-            if new_move:
-                possible_moves += (new_move,)
-        return possible_moves
-
-    def _find_possible_center_moves(self):
-        assert len(self.discs) == 7
-        for disc in self.discs:
-            new_disc = deepcopy(disc)
-            new_perimeter = deepcopy(self.table.perimeter)
-            remaining_discs = [deepcopy(dd) for dd in self.discs if dd != disc]
-            new_move = Move(
-                center=new_disc,
-                perimeter=new_perimeter,
-                remaining_discs=remaining_discs,
-            )
-            self.append_move(new_move)
-
-    def __repr__(self):
-        return f"{self.__class__.__name__}({self.table},remaining_discs:{self.discs})"
