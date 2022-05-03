@@ -19,6 +19,22 @@ class Disc:
         self.slots = slots
         self.rotation = 0
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}{self.slots}R={self.rotation}"
+
+    def __eq__(self, other):
+        if other is None:
+            return False
+        if self.slots == other.slots and self.rotation == other.rotation:
+            return True
+        return False
+
+    @classmethod
+    def from_str(cls, s):
+        ints = list(map(int, s))
+        slots = list(map(Color.from_int, ints))
+        return cls(slots)
+
     def rotate_clockwise(self, times):
         """Rotate the disc changing the color
         in each slot (0<-1, 1<-2, ..., 4<-5, 5<-0).
@@ -34,9 +50,6 @@ class Disc:
             self.rotation += 1
         return self
 
-    def __repr__(self):
-        return f"{self.__class__.__name__}{self.slots},rotation:{self.rotation}"
-
     def reset(self):
         if self.rotation == 0:
             return
@@ -46,16 +59,3 @@ class Disc:
                 self.slots[idx] = self.slots[idx + 1]
             self.slots[5] = saved_slot
         self.rotation = 0
-
-    def __eq__(self, other):
-        if other is None:
-            return False
-        if self.slots == other.slots and self.rotation == other.rotation:
-            return True
-        return False
-
-    @classmethod
-    def from_str(cls, s):
-        ints = list(map(int, s))
-        slots = list(map(Color.from_int, ints))
-        return cls(slots)
