@@ -157,7 +157,8 @@ class Solver:
         else:
             possible_moves = self.find_possible_perimeter_moves()
             if possible_moves:
-                self._possible_moves.extend(possible_moves)
+                for possible_move in possible_moves:
+                    self.append_move(possible_move)
         if DEBUG:
             self.debug_possible_moves()
 
@@ -213,9 +214,9 @@ class Solver:
         print("=" * 20)
 
     def debug_possible_moves(self):
-        for idx, possible_move in enumerate(self._possible_moves):
+        for idx, possible_move in enumerate(self.possible_moves):
             print(
-                f"{idx} of {len(self._possible_moves) - 1}", "\n", possible_move.center
+                f"{idx} of {len(self.possible_moves) - 1}", "\n", possible_move.center
             )
             print(f"{possible_move.perimeter}")
             print(f"{possible_move.remaining_discs}")
