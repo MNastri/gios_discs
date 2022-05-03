@@ -46,18 +46,22 @@ def find_solution():
     empty_table = Table()
     solver = Solver(table=empty_table, discs=ALL_DISCS, known_solutions=known_solutions)
     solution = solver.solve()
+    if solution:
+        print()
+        print()
+        print(solution.center)
+        for disc in solution.perimeter:
+            print(disc)
+        print(solution.remaining_discs)
+    print()
+    print()
     if known_solutions:
         for known_solution in known_solutions:
             print(known_solution.center)
             for disc in known_solution.perimeter:
                 print(disc)
             print(known_solution.remaining_discs)
-    if solution:
-        print("\n" * 2)
-        print(solution.center)
-        for disc in solution.perimeter:
-            print(disc)
-        print(solution.remaining_discs)
 
 
-find_solution()
+if __name__ == "__main__":
+    find_solution()
