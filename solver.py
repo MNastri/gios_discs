@@ -55,67 +55,17 @@ class Solver:
         else:
             return self.solve_breadth_first()
 
-    @property
-    def solution(self):
-        center = deepcopy(self.table.center)
-        perimeter = deepcopy(self.table.perimeter)
-        remaining_discs = deepcopy(self.discs)
-        solution = Move(center, perimeter, remaining_discs)
-        return solution  # TODO DEAL WITH DEBUG AND KNOWN SOLUTION
-
-    @property
-    def possible_moves(self):
-        return self._possible_moves
-
-    @property
-    def not_enough_discs(self):
-        return len(self.discs) < self.table.number_of_empty_places
-
-    @property
-    def move_tracker(self):
-        return f"{self._move_tracker}{self.counter}"
-
-    def pop_move(self) -> Move:
-        return self._possible_moves.pop(0)
-
-    def append_move(self, move_obj: Move):
-        self._possible_moves.append(move_obj)
-
-    def find_possible_moves(self):
-        if self.table.center is None:
-            self.find_possible_center_moves()
-        else:
-            possible_moves = self.find_possible_perimeter_moves()
-            if possible_moves:
-                self._possible_moves.extend(possible_moves)
-        if DEBUG:
-            self.debug_possible_moves()
-
-    def run_next_solver(self, next_move):
-        next_table = Table(next_move.center, next_move.perimeter)
-        move_tracker = deepcopy(self.move_tracker)
-        next_solver = Solver(
-            next_table,
-            next_move.remaining_discs,
-            self.known_solutions,
-            self._depth_first,
-            move_tracker,
-        )
-        solution = next_solver.solve()
-        return solution
-
     def solve_depth_first(self):
         if self.table.is_solved:
             return self.solution
-        # TODO code maybe unecessary,check if this is even possible to happen
         if self.not_enough_discs:
             return False
         if self.table.center is None:
             for disc in self.discs:
-                center = deepcopy(disc)
-                perimeter = deepcopy(self.table.perimeter)
-                remaining_discs = [deepcopy(dd) for dd in self.discs if dd != disc]
-                next_move = Move(center, perimeter, remaining_discs)
+                discs = [deepcopy(dd) for dd in self.discs if dd != disc]
+                next_move = self.create_move_from_copies(
+                    disc, self.table.perimeter, discs
+                )
                 if DEBUG:
                     self.debug_next_move(next_move)
                 solution = self.run_next_solver(next_move)
@@ -156,25 +106,52 @@ class Solver:
                 return solution
         return False
 
-    def test_disc_at_perimeter_index(self, disc, idx):
-        new_disc = deepcopy(disc)
-        remaining_discs = [deepcopy(dd) for dd in self.discs if dd != disc]
-        # TODO instead of checking one by one, find the distance between the desired
-        #  color (the color in slots[0] for example) and the present color,
-        #  then rotate that many times to pair the wanted color with the desired slot.
-        for _ in range(6):
-            self.table.place_at_perimeter(idx, new_disc)
-            if self.table.is_valid:  # TODO INVERT ORDER OF THIS IF
-                center = deepcopy(self.table.center)
-                perimeter = deepcopy(self.table.perimeter)
-                new_move = Move(center, perimeter, remaining_discs)
-                self.table.remove_at_perimeter(idx)
-                return new_move
-            else:
-                self.table.remove_at_perimeter(idx)
-                if new_disc.rotation == 5:
-                    break
-                new_disc.rotate_clockwise(1)
+    @property
+    def solution(self):
+        solution = self.create_move_from_copies(
+            self.table.center, self.table.perimeter, self.discs
+        )
+        return solution  # TODO DEAL WITH DEBUG AND KNOWN SOLUTION
+
+    @property
+    def possible_moves(self):
+        return self._possible_moves
+
+    @property
+    def not_enough_discs(self):
+        return len(self.discs) < self.table.number_of_empty_places
+
+    @property
+    def move_tracker(self):
+        return f"{self._move_tracker}{self.counter}"
+
+    def create_move_from_copies(self, center, perimeter, discs):
+        dc = deepcopy
+        next_move = Move(dc(center), dc(perimeter), discs)
+        return next_move
+
+    def pop_move(self) -> Move:
+        return self._possible_moves.pop(0)
+
+    def append_move(self, move_obj: Move):
+        self._possible_moves.append(move_obj)
+
+    def find_possible_moves(self):
+        if self.table.center is None:
+            self.find_possible_center_moves()
+        else:
+            possible_moves = self.find_possible_perimeter_moves()
+            if possible_moves:
+                self._possible_moves.extend(possible_moves)
+        if DEBUG:
+            self.debug_possible_moves()
+
+    def find_possible_center_moves(self):
+        assert len(self.discs) == 7
+        for disc in self.discs:
+            discs = [deepcopy(dd) for dd in self.discs if dd != disc]
+            new_move = self.create_move_from_copies(disc, self.table.perimeter, discs)
+            self.append_move(new_move)
 
     def find_possible_perimeter_moves(self):
         index_first_empty = self.table.index_of_first_empty_place_perimeter
@@ -185,14 +162,38 @@ class Solver:
                 possible_moves += (new_move,)
         return possible_moves
 
-    def find_possible_center_moves(self):
-        assert len(self.discs) == 7
-        for disc in self.discs:
-            center = deepcopy(disc)
-            new_perimeter = deepcopy(self.table.perimeter)
-            remaining_discs = [deepcopy(dd) for dd in self.discs if dd != disc]
-            new_move = Move(center, new_perimeter, remaining_discs)
-            self.append_move(new_move)
+    def run_next_solver(self, next_move):
+        next_table = Table(next_move.center, next_move.perimeter)
+        move_tracker = deepcopy(self.move_tracker)
+        next_solver = Solver(
+            next_table,
+            next_move.remaining_discs,
+            self.known_solutions,
+            self._depth_first,
+            move_tracker,
+        )
+        solution = next_solver.solve()
+        return solution
+
+    def test_disc_at_perimeter_index(self, disc, idx):
+        new_disc = deepcopy(disc)
+        discs = [deepcopy(dd) for dd in self.discs if dd != disc]
+        # TODO instead of checking one by one, find the distance between the desired
+        #  color (the color in slots[0] for example) and the present color,
+        #  then rotate that many times to pair the wanted color with the desired slot.
+        for _ in range(6):
+            self.table.place_at_perimeter(idx, new_disc)
+            if self.table.is_valid:  # TODO INVERT ORDER OF THIS IF
+                new_move = self.create_move_from_copies(
+                    self.table.center, self.table.perimeter, discs
+                )
+                self.table.remove_at_perimeter(idx)
+                return new_move
+            else:
+                self.table.remove_at_perimeter(idx)
+                if new_disc.rotation == 5:
+                    break
+                new_disc.rotate_clockwise(1)
 
     def debug_table(self):
         print()
