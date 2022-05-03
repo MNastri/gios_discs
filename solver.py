@@ -21,23 +21,30 @@ class Solver:
     """
 
     def __init__(
-        self, table: Table, discs: List[Disc], known_solutions=None, depth_first=True
+        self,
+        table: Table,
+        discs: List[Disc],
+        known_solutions=None,
+        depth_first=True,
+        move_tracker=None,
     ):
         """Constructor for Solver."""
         assert (
             table.number_of_empty_places - len(discs) == 0
         ), "why are you doing this!?"
         self.table = table
-        if DEBUG:
-            self.debug_table()
         self.discs = discs
         if known_solutions is None:
-            self._known_solutions = []
+            self.known_solutions = []
         else:
-            self._known_solutions = known_solutions
+            self.known_solutions = known_solutions
         self._depth_first = depth_first
+        if move_tracker is None:
+            self._move_tracker = ""
+        else:
+            self._move_tracker = move_tracker
         self._possible_moves = []
-        self._counter = 0
+        self.counter = -1
 
     def __repr__(self):
         return f"{self.__class__.__name__}({self.table},remaining_discs:{self.discs})"
@@ -48,33 +55,12 @@ class Solver:
         else:
             return self.solve_breadth_first()
 
-    # def _check_solved(self):  # TODO RENAME
-    #     if self.table.is_solved:
-    #         center = deepcopy(self.table.center)
-    #         perimeter = deepcopy(self.table.perimeter)
-    #         remaining_discs = deepcopy(self.discs)
-    #         solution = Move(
-    #             center=center,
-    #             perimeter=perimeter,
-    #             remaining_discs=remaining_discs,
-    #         )
-    #         if DEBUG and solution in self._known_solutions:
-    #             self._debug_known_solution_found(solution)
-    #             return False
-    #         elif solution in self._known_solutions:
-    #             return False
-    #         return solution
-
     @property
     def solution(self):
         center = deepcopy(self.table.center)
         perimeter = deepcopy(self.table.perimeter)
         remaining_discs = deepcopy(self.discs)
-        solution = Move(
-            center=center,
-            perimeter=perimeter,
-            remaining_discs=remaining_discs,
-        )
+        solution = Move(center, perimeter, remaining_discs)
         return solution  # TODO DEAL WITH DEBUG AND KNOWN SOLUTION
 
     @property
@@ -84,6 +70,10 @@ class Solver:
     @property
     def not_enough_discs(self):
         return len(self.discs) < self.table.number_of_empty_places
+
+    @property
+    def move_tracker(self):
+        return f"{self._move_tracker}{self.counter}"
 
     def pop_move(self) -> Move:
         return self._possible_moves.pop(0)
@@ -101,6 +91,19 @@ class Solver:
         if DEBUG:
             self.debug_possible_moves()
 
+    def run_next_solver(self, next_move):
+        next_table = Table(next_move.center, next_move.perimeter)
+        move_tracker = deepcopy(self.move_tracker)
+        next_solver = Solver(
+            next_table,
+            next_move.remaining_discs,
+            self.known_solutions,
+            self._depth_first,
+            move_tracker,
+        )
+        solution = next_solver.solve()
+        return solution
+
     def solve_depth_first(self):
         if self.table.is_solved:
             return self.solution
@@ -112,49 +115,29 @@ class Solver:
                 center = deepcopy(disc)
                 perimeter = deepcopy(self.table.perimeter)
                 remaining_discs = [deepcopy(dd) for dd in self.discs if dd != disc]
-                new_move = Move(
-                    center=center,
-                    perimeter=perimeter,
-                    remaining_discs=remaining_discs,
-                )
+                next_move = Move(center, perimeter, remaining_discs)
                 if DEBUG:
-                    self.debug_new_move(new_move)
-                next_table = Table(center=new_move.center, perimeter=new_move.perimeter)
-                next_solver = Solver(
-                    table=next_table,
-                    discs=new_move.remaining_discs,
-                    known_solutions=self._known_solutions,
-                    depth_first=self._depth_first,
-                )
-                solution = next_solver.solve()
-                if DEBUG and solution and solution in self._known_solutions:
+                    self.debug_next_move(next_move)
+                solution = self.run_next_solver(next_move)
+                if DEBUG and solution and solution in self.known_solutions:
                     self.debug_known_solution_found(solution)
                     return False
-                elif solution and solution in self._known_solutions:
+                elif solution and solution in self.known_solutions:
                     return False
                 elif solution:
                     return solution
         else:
             index_first_empty = self.table.index_of_first_empty_place_perimeter
             for disc in self.discs:
-                new_move = self.test_disc_at_perimeter_index(disc, index_first_empty)
-                if new_move and DEBUG:
-                    self.debug_new_move(new_move)
-                elif new_move:
-                    next_table = Table(
-                        center=new_move.center, perimeter=new_move.perimeter
-                    )
-                    next_solver = Solver(
-                        table=next_table,
-                        discs=new_move.remaining_discs,
-                        known_solutions=self._known_solutions,
-                        depth_first=self._depth_first,
-                    )
-                    solution = next_solver.solve()
-                    if DEBUG and solution and solution in self._known_solutions:
+                next_move = self.test_disc_at_perimeter_index(disc, index_first_empty)
+                if next_move and DEBUG:
+                    self.debug_next_move(next_move)
+                if next_move:
+                    solution = self.run_next_solver(next_move)
+                    if DEBUG and solution and solution in self.known_solutions:
                         self.debug_known_solution_found(solution)
                         return False
-                    elif solution and solution in self._known_solutions:
+                    elif solution and solution in self.known_solutions:
                         return False
                     elif solution:
                         return solution
@@ -168,15 +151,8 @@ class Solver:
         self.find_possible_moves()
         while self.possible_moves:
             next_move = self.pop_move()
-            next_table = Table(center=next_move.center, perimeter=next_move.perimeter)
-            next_solver = Solver(
-                table=next_table,
-                discs=next_move.remaining_discs,
-                known_solutions=self._known_solutions,
-                depth_first=self._depth_first,
-            )
-            solution = next_solver.solve()
-            if isinstance(solution, Move):
+            solution = self.run_next_solver(next_move)
+            if solution:
                 return solution
         return False
 
@@ -191,11 +167,7 @@ class Solver:
             if self.table.is_valid:  # TODO INVERT ORDER OF THIS IF
                 center = deepcopy(self.table.center)
                 perimeter = deepcopy(self.table.perimeter)
-                new_move = Move(
-                    center=center,
-                    perimeter=perimeter,
-                    remaining_discs=remaining_discs,
-                )
+                new_move = Move(center, perimeter, remaining_discs)
                 self.table.remove_at_perimeter(idx)
                 return new_move
             else:
@@ -216,25 +188,21 @@ class Solver:
     def find_possible_center_moves(self):
         assert len(self.discs) == 7
         for disc in self.discs:
-            new_disc = deepcopy(disc)
+            center = deepcopy(disc)
             new_perimeter = deepcopy(self.table.perimeter)
             remaining_discs = [deepcopy(dd) for dd in self.discs if dd != disc]
-            new_move = Move(
-                center=new_disc,
-                perimeter=new_perimeter,
-                remaining_discs=remaining_discs,
-            )
+            new_move = Move(center, new_perimeter, remaining_discs)
             self.append_move(new_move)
 
     def debug_table(self):
         print()
         print(self.table)
 
-    def debug_new_move(self, new_move):
-        print(f"{self._counter}", "\n", new_move.center)
-        self._counter += 1
-        print(f"{new_move.perimeter}")
-        print(f"{new_move.remaining_discs}")
+    def debug_next_move(self, next_move):
+        self.counter += 1
+        print(f"Move {self.move_tracker:<7}", end=" = ")
+        print(f"T({[next_move.center, *next_move.perimeter]})")
+        # print(f"{next_move.remaining_discs}")
 
     def debug_known_solution_found(self, solution):
         print("=" * 20)
