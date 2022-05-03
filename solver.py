@@ -81,6 +81,10 @@ class Solver:
     def possible_moves(self):
         return self._possible_moves
 
+    @property
+    def not_enough_discs(self):
+        return len(self.discs) < self.table.number_of_empty_places
+
     def pop_move(self) -> Move:
         return self._possible_moves.pop(0)
 
@@ -156,12 +160,12 @@ class Solver:
                         return solution
 
     def solve_breadth_first(self):
-        self.find_possible_moves()
         if self.table.is_solved:
             return self.solution
         # TODO code maybe unecessary,check if this is even possible to happen
         if self.not_enough_discs:
             return False
+        self.find_possible_moves()
         while self.possible_moves:
             next_move = self.pop_move()
             next_table = Table(center=next_move.center, perimeter=next_move.perimeter)
@@ -175,10 +179,6 @@ class Solver:
             if isinstance(solution, Move):
                 return solution
         return False
-
-    @property
-    def not_enough_discs(self):
-        return len(self.discs) < self.table.number_of_empty_places
 
     def test_disc_at_perimeter_index(self, disc, idx):
         new_disc = deepcopy(disc)
